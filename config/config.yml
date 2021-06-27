@@ -1,0 +1,14 @@
+s-admins: [123456]
+bots: 
+  - id: 123456
+    name: 我是一个bot
+    host: 127.0.0.1
+    port: 6040
+    access-token: token
+    time-out: 30 # 超时未收到cq心跳消息将重连， 如果未0则不进行心跳检测，建议时间比cq设置的高
+    admins: [123456]
+# logrus: PANIC, FATAL, ERROR, WARN, WARNING, INFO, DEBUG, TRACE
+log: 
+  level: DEBUG
+  max-files: 20
+

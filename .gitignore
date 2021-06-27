@@ -1,0 +1,6 @@
+.git/
+dev/
+.vscode/
+doc
+logs/
+log/
