@@ -10,32 +10,29 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-const (
-	_T_GROUP   = int64(822628994)
-	_T_USER_ID = int64(942505672)
-)
-
 var (
 	Conf Config
 	bots BotCtxs
 )
 
 type Config struct {
-	BotInfos []BotInfo `yaml:"bots"`
-	LogConf  LogConf   `yaml:"log"`
-	SAdmins  []int64   `yaml:"s-admin"`
+	BotInfos         []BotInfo `yaml:"bots"`
+	LogConf          LogConf   `yaml:"log"`
+	SAdmins          []int64   `yaml:"s-admin"`
+	CallbackPoolSize int       `yaml:"callback-pool-size"`
 }
 
 type BotCtxs = []BotContext
 
 type BotInfo struct {
-	BotID   int64   `yaml:"id"`
-	Host    string  `yaml:"host"`
-	Port    int     `yaml:"port"`
-	Name    string  `yaml:"name"`
-	Token   string  `yaml:"access-token"`
-	Timeout int     `yaml:"time-out"`
-	Admins  []int64 `yaml:"admins"`
+	BotID       int64   `yaml:"id"`
+	Host        string  `yaml:"host"`
+	Port        int     `yaml:"port"`
+	Name        string  `yaml:"name"`
+	Token       string  `yaml:"access-token"`
+	Timeout     int     `yaml:"time-out"`
+	Admins      []int64 `yaml:"admins"`
+	MessageType string  `yaml:"message-type"`
 }
 
 type BotContext struct {
@@ -67,8 +64,10 @@ func Init(conf string) {
 }
 
 func Start() {
-	InitBotCtxs()
+	InitPluginList()
+	InitBotCtxs(Conf.BotInfos)
 	InitEventDispatcher()
+	InitRespDispatcher(Conf.CallbackPoolSize)
 	InitBackenPlugin()
 }
 

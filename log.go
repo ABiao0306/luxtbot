@@ -13,6 +13,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+var (
+	LBLogger logrus.Logger
+)
+
 const (
 	DefaultLevel       = logrus.WarnLevel
 	DefaultFileNameFmt = "./logs/%Y-%m-%d.log"
@@ -41,16 +45,18 @@ func InitLogConf() {
 		logConf.MaxFiles = DefaultMaxFiles
 	}
 	writers := io.MultiWriter(os.Stdout, rotateWriter(DefaultFileNameFmt, logConf.MaxFiles, DefaultRotateDura))
-	logrus.SetOutput(writers)
-	logrus.SetReportCaller(true)
-	logrus.SetFormatter(formatter)
+	LBLogger = logrus.Logger{}
+
+	LBLogger.SetOutput(writers)
+	LBLogger.SetReportCaller(true)
+	LBLogger.SetFormatter(formatter)
 	level, err = logrus.ParseLevel(Conf.LogConf.Level)
 	if err != nil {
-		logrus.Warnln("Log Config level is Wrong, use default log level: WARN")
+		LBLogger.Warnln("Log Config level is Wrong, use default log level: WARN")
 		level = DefaultLevel
 	} else {
-		logrus.SetLevel(level)
-		logrus.Infoln("Use Log Level: ", Conf.LogConf.Level)
+		LBLogger.SetLevel(level)
+		LBLogger.Infoln("Use Log Level: ", Conf.LogConf.Level)
 	}
 }
 
