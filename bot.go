@@ -69,6 +69,7 @@ func Start() {
 	InitEventDispatcher()
 	InitRespDispatcher(Conf.CallbackPoolSize)
 	InitBackenPlugin()
+	select{}
 }
 
 func getBotCtxByID(botID int64) (*BotContext, error) {
