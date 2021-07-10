@@ -1,19 +1,20 @@
 package util
 
 import (
-	"strconv"
-	"time"
+	"github.com/rs/xid"
 )
 
-func RunTimedTask(dura time.Duration, task func(...interface{}), args ...interface{}) {
-	ticker := time.NewTicker(dura)
-	go func() {
-		for _ = range ticker.C {
-			task(args...)
-		}
-	}()
+func GetEchoStr() string {
+	echo := xid.New()
+	return echo.String()
 }
 
-func GetEchoStr() string {
-	return strconv.FormatInt(time.Now().UnixNano(), 10)
+func Trim(s string) string {
+	for i, c := range s {
+		if c == ' ' || c == '\t' || c == '\n' || c == '\r' {
+			continue
+		}
+		return s[i:]
+	}
+	return s
 }
