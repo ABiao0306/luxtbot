@@ -41,7 +41,7 @@ type apiRespContext struct {
 }
 
 func InitPluginList() {
-	sort.SliceStable(PluginList, func(l, r int) bool{
+	sort.SliceStable(PluginList, func(l, r int) bool {
 		return PluginList[l].ID < PluginList[r].ID
 	})
 	for _, plg := range PluginList {
@@ -67,57 +67,61 @@ func InitBotCtxs(bInfos []BotInfo) {
 }
 
 func InitEventDispatcher() {
-	for {
-		eCtx := <-cqEventChan
-		e, bCtx := eCtx.e, eCtx.bCtx
-		switch e.PostType {
-		case MessageEvent:
-			for _, mp := range MsgChain {
-				if !mp.Plg.Enable || !mp.Rule.CheckRules(e, *bCtx.BotInfo) {
+	go func() {
+		for {
+			eCtx := <-cqEventChan
+			e, bCtx := eCtx.e, eCtx.bCtx
+			switch e.PostType {
+			case MessageEvent:
+				for _, mp := range MsgChain {
+					if !mp.Plg.Enable || !mp.Rule.CheckRules(e, *bCtx.BotInfo) {
+						continue
+					}
+					mp.Process(e, *bCtx.BotInfo)
+				}
+				cmd, qq := parseCmd(e)
+				if cmd == "" {
 					continue
 				}
-				mp.Process(e, *bCtx.BotInfo)
-			}
-			cmd, qq := parseCmd(e)
-			if cmd == "" {
-				continue
-			}
-			for _, cp := range CmdChain {
-				if !cp.Plg.Enable || !cp.matchCmd(cmd, qq, *&bCtx.BotInfo.BotID) || !cp.Rule.CheckRules(e, *bCtx.BotInfo) {
-					continue
+				for _, cp := range CmdChain {
+					if !cp.Plg.Enable || !cp.matchCmd(cmd, qq, *&bCtx.BotInfo.BotID) || !cp.Rule.CheckRules(e, *bCtx.BotInfo) {
+						continue
+					}
+					cp.Process(e, parseParams(e), *bCtx.BotInfo)
 				}
-				cp.Process(e, parseParams(e), *bCtx.BotInfo)
-			}
-		case NoticeEvent:
-			for _, np := range NoticeChain {
-				if !np.Plg.Enable || !np.Rule.CheckRules(e, *bCtx.BotInfo) {
-					continue
+			case NoticeEvent:
+				for _, np := range NoticeChain {
+					if !np.Plg.Enable || !np.Rule.CheckRules(e, *bCtx.BotInfo) {
+						continue
+					}
+					np.Process(e, *bCtx.BotInfo)
 				}
-				np.Process(e, *bCtx.BotInfo)
-			}
-		case RequestEvent:
-			for _, mp := range MsgChain {
-				if !mp.Plg.Enable || !mp.Rule.CheckRules(e, *bCtx.BotInfo) {
-					continue
+			case RequestEvent:
+				for _, mp := range MsgChain {
+					if !mp.Plg.Enable || !mp.Rule.CheckRules(e, *bCtx.BotInfo) {
+						continue
+					}
+					mp.Process(e, *bCtx.BotInfo)
 				}
-				mp.Process(e, *bCtx.BotInfo)
+			case MetaEvent:
+				processMateEvent(e, bCtx)
 			}
-		case MetaEvent:
-			processMateEvent(e, bCtx)
 		}
-	}
+	}()
 }
 
 func InitRespDispatcher(poolSize int) {
-	callBackPool = make(map[string]EchoCallback, poolSize)
-	for {
-		select{
-		case respCtx := <-cqRespChan:
-			if respCtx.resp.Echo != "" {
-				doEchoCallback(respCtx.resp, respCtx.bCtx)
+	go func() {
+		callBackPool = make(map[string]EchoCallback, poolSize)
+		for {
+			select {
+			case respCtx := <-cqRespChan:
+				if respCtx.resp.Echo != "" {
+					doEchoCallback(respCtx.resp, respCtx.bCtx)
+				}
 			}
 		}
-	}
+	}()
 }
 
 type EchoCallback func(apiResp *ApiResp, bInfo BotInfo)
