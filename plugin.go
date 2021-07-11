@@ -89,7 +89,7 @@ func (p *Plugin) AddRequestUnit() *RequestUnit {
 type BackenUnit struct {
 	Plg   *Plugin
 	Init  func()
-	Start func(bots BotCtxs)
+	Start func(bInfos []BotInfo)
 }
 
 func (bp *BackenUnit) SetInitFunc(f func()) *BackenUnit {
@@ -97,7 +97,7 @@ func (bp *BackenUnit) SetInitFunc(f func()) *BackenUnit {
 	return bp
 }
 
-func (bp *BackenUnit) SetStartFunc(f func(bots []BotContext)) *BackenUnit {
+func (bp *BackenUnit) SetStartFunc(f func(bInfos []BotInfo)) *BackenUnit {
 	bp.Start = f
 	return bp
 }
