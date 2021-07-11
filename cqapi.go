@@ -164,5 +164,5 @@ func MakePrivateMsg(msgBuilder MsgBuilder, userID int64) ApiPost {
 		AutoEscape: false,
 		Message:    msgData,
 	}
-	return makeApi(GroupMsgAction, msg)
+	return makeApi(PrivateMsgAction, msg)
 }

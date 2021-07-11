@@ -148,7 +148,7 @@ func doEchoCallback(apiResp *ApiResp, bCtx *BotContext) {
 func InitBackenPlugin() {
 	for _, bp := range BackenChain {
 		bp.Init()
-		go bp.Start(bots)
+		go bp.Start(Conf.BotInfos)
 	}
 }
 
