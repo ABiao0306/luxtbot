@@ -85,6 +85,7 @@ type Sender struct {
 	UserID   int64  `json:"user_id"`
 }
 
+// Params: ptr
 type ApiPost struct {
 	Action string      `json:"action"`
 	Params interface{} `json:"params"`
@@ -146,7 +147,7 @@ func MakeGroupMsg(msgBuilder MsgBuilder, groupID int64) ApiPost {
 	if err != nil {
 		LBLogger.WithField("目标群", groupID).Infof("检查到消息异常，将放弃该条消息：%v", err)
 	}
-	msg := GroupMsg{
+	msg := &GroupMsg{
 		GroupID:    groupID,
 		AutoEscape: false,
 		Message:    msgData,
@@ -159,7 +160,7 @@ func MakePrivateMsg(msgBuilder MsgBuilder, userID int64) ApiPost {
 	if err != nil {
 		LBLogger.WithField("目标QQ", userID).Infof("检查到消息异常，将放弃该条消息：%v", err)
 	}
-	msg := PrivateMsg{
+	msg := &PrivateMsg{
 		UserID:     userID,
 		AutoEscape: false,
 		Message:    msgData,

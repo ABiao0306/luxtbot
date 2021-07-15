@@ -61,15 +61,16 @@ func Init(conf string) {
 		panic("打开配置文件失败：" + conf)
 	}
 	InitLogConf()
+	InitPluginList()
+	InitBotCtxs()
 }
 
 func Start() {
-	InitPluginList()
-	InitBotCtxs(Conf.BotInfos)
-	InitEventDispatcher()
-	InitRespDispatcher(Conf.CallbackPoolSize)
-	InitBackenPlugin()
-	select{}
+	RunBots()
+	RunEventDispatcher()
+	RunRespDispatcher(Conf.CallbackPoolSize)
+	RunBackenPlugin()
+	select {}
 }
 
 func getBotCtxByID(botID int64) (*BotContext, error) {

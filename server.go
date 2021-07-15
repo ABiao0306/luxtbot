@@ -49,8 +49,16 @@ func InitPluginList() {
 	}
 }
 
-func InitBotCtxs(bInfos []BotInfo) {
-	for _, bot := range bInfos {
+func InitBackenPlugin() {
+	for _, bp := range BackenChain {
+		if bp.Init != nil {
+			bp.Init()
+		}
+	}
+}
+
+func InitBotCtxs() {
+	for _, bot := range Conf.BotInfos {
 		bCtx := BotContext{
 			Conn:      nil,
 			CloseLock: new(sync.Mutex),
@@ -61,12 +69,17 @@ func InitBotCtxs(bInfos []BotInfo) {
 			BotInfo:   &bot,
 		}
 		bots = append(bots, bCtx)
-		go connCQServer(&bCtx, ReconnTimes)
-		go heartCheck(&bCtx)
 	}
 }
 
-func InitEventDispatcher() {
+func RunBots() {
+	for i := range bots {
+		go connCQServer(&bots[i], ReconnTimes)
+		go heartCheck(&bots[i])
+	}
+}
+
+func RunEventDispatcher() {
 	go func() {
 		for {
 			eCtx := <-cqEventChan
@@ -110,7 +123,7 @@ func InitEventDispatcher() {
 	}()
 }
 
-func InitRespDispatcher(poolSize int) {
+func RunRespDispatcher(poolSize int) {
 	go func() {
 		callBackPool = make(map[string]EchoCallback, poolSize)
 		for {
@@ -145,16 +158,19 @@ func doEchoCallback(apiResp *ApiResp, bCtx *BotContext) {
 	callBackPool[apiResp.Echo] = nil
 }
 
-func InitBackenPlugin() {
+func RunBackenPlugin() {
 	for _, bp := range BackenChain {
-		bp.Init()
+		if bp.Start == nil {
+			LBLogger.WithField("Plugin", bp.Plg.Name).Debugln("the start func of backen plugin is nil!")
+			continue
+		}
 		go bp.Start(Conf.BotInfos)
 	}
 }
 
 func connCQServer(bCtx *BotContext, try int) {
 	header := make(http.Header)
-	header.Add("Authorization", "dasdasddasdasd Ym90LXNhaWtv")
+	header.Add("Authorization", TokenPrefix + bCtx.BotInfo.Token)
 	header.Add("Content-Type", "application/json; charset=utf-8")
 	var (
 		conn *ws.Conn
