@@ -90,7 +90,7 @@ func RunEventDispatcher() {
 					if !mp.Plg.Enable || !mp.Rule.CheckRules(e, *bCtx.BotInfo) {
 						continue
 					}
-					mp.Process(e, *bCtx.BotInfo)
+					go mp.Process(e, *bCtx.BotInfo)
 				}
 				cmd, qq := parseCmd(e)
 				if cmd == "" {
@@ -100,21 +100,21 @@ func RunEventDispatcher() {
 					if !cp.Plg.Enable || !cp.matchCmd(cmd, qq, *&bCtx.BotInfo.BotID) || !cp.Rule.CheckRules(e, *bCtx.BotInfo) {
 						continue
 					}
-					cp.Process(e, parseParams(e), *bCtx.BotInfo)
+					go cp.Process(e, parseParams(e), *bCtx.BotInfo)
 				}
 			case NoticeEvent:
 				for _, np := range NoticeChain {
 					if !np.Plg.Enable || !np.Rule.CheckRules(e, *bCtx.BotInfo) {
 						continue
 					}
-					np.Process(e, *bCtx.BotInfo)
+					go np.Process(e, *bCtx.BotInfo)
 				}
 			case RequestEvent:
 				for _, mp := range MsgChain {
 					if !mp.Plg.Enable || !mp.Rule.CheckRules(e, *bCtx.BotInfo) {
 						continue
 					}
-					mp.Process(e, *bCtx.BotInfo)
+					go mp.Process(e, *bCtx.BotInfo)
 				}
 			case MetaEvent:
 				processMateEvent(e, bCtx)

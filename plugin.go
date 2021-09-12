@@ -163,7 +163,6 @@ func (cp *CommandUnit) SetRule(rule *Rule) *CommandUnit {
 	return cp
 }
 
-
 func (cp *CommandUnit) AddToCmdChain() {
 	CmdChain = append(CmdChain, *cp)
 }
@@ -188,11 +187,14 @@ func parseCmd(e *Event) (string, string) {
 	msg := e.GetArrayMsg()
 	cmd, text, qq := "", "", ""
 	if msg[0].Type == AtMsgSeg {
+		qq = msg[0].Data["qq"]
+		if len(msg) < 2 {
+			return cmd, qq
+		}
 		text = util.Trim(msg[1].Data["text"])
 		// LBLogger.Debugln("text is ", text)
 		args := strings.SplitN(text, " ", 2)
 		cmd = args[0]
-		qq = msg[0].Data["qq"]
 	} else if msg[0].Type == TextMsgSeg {
 		text = msg[0].Data["text"]
 		if text[0] == '~' || text[0] == '$' || text[0] == '#' {
@@ -238,7 +240,6 @@ func (np *NoticeUnit) SetRule(rule *Rule) *NoticeUnit {
 	np.Rule = rule
 	return np
 }
-
 
 func (np *NoticeUnit) AddToNoticeChain() {
 	NoticeChain = append(NoticeChain, *np)
@@ -331,7 +332,7 @@ func searchPugin(idStr string) (*Plugin, error) {
 	for l <= r {
 		m = (l + r) / 2
 		if PluginList[m].ID > id {
-			r = m - 1 
+			r = m - 1
 		} else if PluginList[m].ID < id {
 			l = m + 1
 		} else {
