@@ -183,13 +183,16 @@ func (cp *CommandUnit) matchCmd(cmd, qq string, botID int64) bool {
 }
 
 // @return cmd, qqnum
-func parseCmd(e *Event) (string, string) {
+func parseCmd(e *Event) (string, string, error) {
 	msg := e.GetArrayMsg()
 	cmd, text, qq := "", "", ""
+	if len(msg) <= 0 {
+		return "", "", nil
+	}
 	if msg[0].Type == AtMsgSeg {
 		qq = msg[0].Data["qq"]
 		if len(msg) < 2 {
-			return cmd, qq
+			return cmd, qq, nil
 		}
 		text = util.Trim(msg[1].Data["text"])
 		// LBLogger.Debugln("text is ", text)
@@ -202,7 +205,7 @@ func parseCmd(e *Event) (string, string) {
 			cmd = args[0][1:]
 		}
 	}
-	return cmd, qq
+	return cmd, qq, nil
 }
 
 func parseParams(e *Event) []string {

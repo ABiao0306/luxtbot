@@ -92,8 +92,8 @@ func RunEventDispatcher() {
 					}
 					go mp.Process(e, *bCtx.BotInfo)
 				}
-				cmd, qq := parseCmd(e)
-				if cmd == "" {
+				cmd, qq, err := parseCmd(e)
+				if err != nil {
 					continue
 				}
 				for _, cp := range CmdChain {
